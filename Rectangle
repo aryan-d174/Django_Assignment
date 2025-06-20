@@ -1,0 +1,91 @@
+class Rectangle:
+    """
+    A class to represent a Rectangle with length and width.
+    Instances can be iterated over to yield length and width dictionaries.
+    """
+
+    def __init__(self, length: int, width: int):
+        """
+        Initializes a new Rectangle instance.
+
+        Args:
+            length (int): The length of the rectangle.
+            width (int): The width of the rectangle.
+
+        Raises:
+            ValueError: If length or width are not positive integers.
+        """
+        if not isinstance(length, int) or length <= 0:
+            raise ValueError("Length must be a positive integer.")
+        if not isinstance(width, int) or width <= 0:
+            raise ValueError("Width must be a positive integer.")
+
+        self._length = length
+        self._width = width
+
+    @property
+    def length(self) -> int:
+        """Get the length of the rectangle."""
+        return self._length
+
+    @property
+    def width(self) -> int:
+        """Get the width of the rectangle."""
+        return self._width
+
+    def __iter__(self):
+        """
+        Makes the Rectangle instance iterable.
+        Yields the length and then the width as dictionaries.
+        """
+        yield {'length': self._length}
+        yield {'width': self._width}
+
+    def __repr__(self):
+        """
+        Provides a string representation of the Rectangle object for debugging.
+        """
+        return f"Rectangle(length={self._length}, width={self._width})"
+
+    def __str__(self):
+        """
+        Provides a user-friendly string representation of the Rectangle object.
+        """
+        return f"Rectangle with Length: {self._length}, Width: {self._width}"
+
+# Example Usage:
+if __name__ == "__main__":
+    try:
+        # Create a Rectangle instance
+        rect = Rectangle(length=10, width=5)
+        print(f"Created rectangle: {rect}")
+
+        # Iterate over the Rectangle instance
+        print("Iterating over the rectangle:")
+        for item in rect:
+            print(item)
+
+        print("\n--- Testing with another rectangle ---")
+        rect2 = Rectangle(15, 8)
+        for data in rect2:
+            print(data)
+
+        # Example of invalid initialization
+        print("\n--- Testing invalid input ---")
+        try:
+            invalid_rect = Rectangle(0, 5)
+        except ValueError as e:
+            print(f"Error creating rectangle: {e}")
+
+        try:
+            invalid_rect2 = Rectangle(10, -2)
+        except ValueError as e:
+            print(f"Error creating rectangle: {e}")
+
+        try:
+            invalid_rect3 = Rectangle(5.5, 2)
+        except ValueError as e:
+            print(f"Error creating rectangle: {e}")
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
