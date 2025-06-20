@@ -1,0 +1,32 @@
+By default, Django signals are executed synchronously.
+
+
+# myapp/signals.py
+from django.dispatch import Signal, receiver
+import time
+
+# Define a custom signal
+my_custom_signal = Signal()
+
+@receiver(my_custom_signal)
+def receiver_one(sender, **kwargs):
+    print("Receiver One: Started")
+    time.sleep(1)  # Simulate some work
+    print("Receiver One: Finished")
+
+@receiver(my_custom_signal)
+def receiver_two(sender, **kwargs):
+    print("Receiver Two: Started")
+    time.sleep(0.5) # Simulate some work
+    print("Receiver Two: Finished")
+
+# myapp/views.py (or any place where you send the signal)
+from django.shortcuts import render
+from django.http import HttpResponse
+from .signals import my_custom_signal
+
+def send_signal_view(request):
+    print("Sender: Before sending signal")
+    my_custom_signal.send(sender='MyApp')
+    print("Sender: After sending signal")
+    return HttpResponse("Signal sent!")
