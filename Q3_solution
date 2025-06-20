@@ -1,0 +1,48 @@
+By default, Django signals do not inherently run within the same database transaction as the caller, unless the caller itself is explicitly wrapped in a transaction, and the signal receiver also operates within that same transactional context.
+
+# myapp/models.py
+from django.db import models
+
+class LogEntry(models.Model):
+    message = models.CharField(max_length=255)
+
+# myapp/signals.py
+from django.dispatch import Signal, receiver
+from django.db import transaction
+from .models import LogEntry
+
+my_transaction_signal = Signal()
+
+@receiver(my_transaction_signal)
+def transaction_receiver(sender, **kwargs):
+    try:
+        # This will auto-commit if no outer transaction is active
+        LogEntry.objects.create(message="Receiver: Database operation performed.")
+        print("Receiver: LogEntry created successfully.")
+    except Exception as e:
+        print(f"Receiver: Error creating LogEntry: {e}")
+
+# myapp/views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.db import transaction
+from .signals import my_transaction_signal
+from .models import LogEntry
+
+def send_transaction_signal_view(request):
+    print("Sender: Starting view.")
+    try:
+        with transaction.atomic():
+            print("Sender: Inside atomic block.")
+            LogEntry.objects.create(message="Sender: Database operation in transaction.")
+            print("Sender: LogEntry created in transaction.")
+
+            my_transaction_signal.send(sender='MyApp')
+            print("Sender: Signal sent.")
+
+            # If you uncomment this, the receiver's operation will be rolled back too
+            # raise ValueError("Simulating an error within the transaction.")
+
+        print("Sender: Atomic block finished (transaction committed).")
+    except Exception as e:
+        print(f"Sender: An error occurred: {e}. Transaction likely rolled back.")
