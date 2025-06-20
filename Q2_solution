@@ -1,0 +1,25 @@
+Yes, by default, Django signals run in the same thread as the caller.
+
+# myapp/signals.py
+from django.dispatch import Signal, receiver
+import threading
+
+my_thread_signal = Signal()
+
+@receiver(my_thread_signal)
+def thread_receiver(sender, **kwargs):
+    current_thread_name = threading.current_thread().name
+    print(f"Receiver Thread: {current_thread_name}")
+
+# myapp/views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .signals import my_thread_signal
+import threading
+
+def send_thread_signal_view(request):
+    current_thread_name = threading.current_thread().name
+    print(f"Sender Thread: {current_thread_name}")
+    my_thread_signal.send(sender='MyApp')
+    print(f"Sender Thread: Still in {current_thread_name}") # This will print last, but the thread name will be the same
+    return HttpResponse("Thread signal sent!")
